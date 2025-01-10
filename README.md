@@ -59,3 +59,13 @@ pip install -e . --verbose
 ```bash
 python tests/base.py
 ```
+
+# Debug
+
+```bash
+apt install gdb
+```
+
+参考.vscode/launch.json 配合使用
+
+
