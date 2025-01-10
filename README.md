@@ -22,6 +22,12 @@ MyTorch 是一个 Python 库，其中包含预编译的 C++ 和 CUDA (12+) 二�
 docker build --build-arg max_jobs=16 --build-arg CUDA_VERSION=12.4.1 --build-arg PYTHON_VERSION=3.12 --tag jieni-cuda-dev:build-image --progress plain .
 ```
 
+## 安装build pypi所需的依赖
+
+```bash
+pip install -r requirements-build.txt
+```
+
 ## [可选] 使用conda创建新的Python环境
 
 你可以使用 `conda` 创建一个新的 Python 环境：

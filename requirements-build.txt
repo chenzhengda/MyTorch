@@ -1,0 +1,4 @@
+# Should be mirrored in pyproject.toml
+cmake>=3.26
+setuptools>=61
+setuptools-scm>=8.0
