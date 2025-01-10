@@ -18,6 +18,7 @@ extern "C" {
     void delete_strides(Tensor* tensor);
     void delete_device(Tensor* tensor);
     float get_item(Tensor* tensor, int* indices);
+    Tensor* add_tensor(Tensor* tensor1, Tensor* tensor2);
 }
 
 #endif /* TENSOR_H */

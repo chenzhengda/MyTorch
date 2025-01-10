@@ -1,4 +1,4 @@
-add_library(MyTorch SHARED tensor.cpp)
+add_library(MyTorch SHARED tensor.cpp cpu.cpp)
 target_include_directories(MyTorch PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # 添加编译选项

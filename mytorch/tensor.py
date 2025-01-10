@@ -160,3 +160,76 @@ class Tensor:
         return self.__str__()
 
 
+    def __add__(self, other):
+        if isinstance(other, (int, float)):
+            other = other * self.ones_like()
+
+        broadcasted_shape_add = []
+
+        # Function to determine if broadcasting is needed and get the broadcasted shape
+        def broadcast_shape(shape1, shape2):
+            if shape1 == shape2:
+                return shape1, False
+            
+            max_len = max(len(shape1), len(shape2))
+            shape1 = [1] * (max_len - len(shape1)) + shape1
+            shape2 = [1] * (max_len - len(shape2)) + shape2
+
+            
+            for dim1, dim2 in zip(shape1, shape2):
+                if dim1 != dim2 and dim1 != 1 and dim2 != 1:
+                    raise ValueError("Shapes are not compatible for broadcasting")
+                broadcasted_shape_add.append(max(dim1, dim2))
+            return broadcasted_shape_add, True
+
+        broadcasted_shape_add, needs_broadcasting = broadcast_shape(self.shape, other.shape)
+
+        if needs_broadcasting:
+            # Call add_broadcasted_tensor if broadcasting is needed
+            if other.ndim == self.ndim - 1:
+                other = other.reshape([1] + other.shape)
+            
+            elif self.ndim == other.ndim - 1:
+                self = self.reshape([1] + self.shape)
+                
+            
+                
+            Tensor._C.add_broadcasted_tensor.argtypes = [ctypes.POINTER(CTensor), ctypes.POINTER(CTensor)]
+            Tensor._C.add_broadcasted_tensor.restype = ctypes.POINTER(CTensor)
+
+            result_tensor_ptr = Tensor._C.add_broadcasted_tensor(self.tensor, other.tensor)
+
+            result_data = Tensor()
+            result_data.tensor = result_tensor_ptr
+            result_data.shape = broadcasted_shape_add.copy()
+            result_data.ndim = len(broadcasted_shape_add)
+
+            result_data.device = self.device
+            result_data.numel = 1
+            for s in result_data.shape:
+                result_data.numel *= s
+
+            result_data.requires_grad = self.requires_grad or other.requires_grad
+            if result_data.requires_grad:
+                raise NotImplementedError("AddBroadcastedBackward is not implemented")
+        
+        else:
+            # Call add_tensor if shapes are identical
+            Tensor._C.add_tensor.argtypes = [ctypes.POINTER(CTensor), ctypes.POINTER(CTensor)]
+            Tensor._C.add_tensor.restype = ctypes.POINTER(CTensor)
+
+            result_tensor_ptr = Tensor._C.add_tensor(self.tensor, other.tensor)
+
+            result_data = Tensor()
+            result_data.tensor = result_tensor_ptr
+            result_data.shape = self.shape.copy()
+            result_data.ndim = self.ndim
+
+            result_data.device = self.device
+            result_data.numel = self.numel  # Update this to calculate the correct number of elements if broadcasting
+
+            result_data.requires_grad = self.requires_grad or other.requires_grad
+            if result_data.requires_grad:
+                raise NotImplementedError("AddBackward is not implemented")
+
+        return result_data
